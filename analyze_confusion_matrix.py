@@ -13,7 +13,7 @@ validation_generator = validation_datagen.flow_from_directory(
 
 print (validation_generator.class_indices)
 
-with open('confusion2.txt','rb') as f:
+with open('confusion.txt','rb') as f:
     m = np.loadtxt(f)
 
 col = 28

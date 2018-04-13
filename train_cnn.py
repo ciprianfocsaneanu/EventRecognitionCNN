@@ -8,24 +8,25 @@ Fine tunning of InceptionV3/Resnet50/DenseNet121 models pre-trained on ImageNet:
 - make a smaller subset of base model untrainable
 - train for a number of epochs
 '''
+
 from keras import backend as K
 from keras.applications.inception_v3 import InceptionV3
 from keras.applications.resnet50 import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
-from keras.optimizers import SGD
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.models import Model, model_from_json
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
-
-from sklearn.metrics import confusion_matrix
+from keras.optimizers import SGD
 
 import numpy as np
 import tensorflow as tf
 import sys
 from time import time
+from sklearn.metrics import confusion_matrix
 
+# Define flags for input arguments
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('model', 'inceptionv3', 'Base model')
@@ -89,15 +90,13 @@ x = base_model.output
 x = GlobalAveragePooling2D()(x)
 # Let's add a fully-connected layer
 x = Dense(1024, activation = 'relu')(x)
-# And a logistic layer -- let's say we have 200 classes
+# And a logistic layer
 predictions = Dense(classes, activation = 'softmax')(x)
 
 # This is the model we will train
 model = Model(inputs = base_model.input, outputs = predictions)
-print (len(base_model.layers))
 
-# First: train only the top layers (which were randomly initialized)
-# i.e. freeze all convolutional InceptionV3 layers
+# First: train only the extra top layers (which were randomly initialized)
 for layer in base_model.layers:
     layer.trainable = False
 
@@ -116,37 +115,7 @@ model.fit_generator(
 
 print ('Finished training only the extra layers')
 
-# TODO: Fix/update Create confusion matrix
-test_datagen = ImageDataGenerator(rescale = 1./255)
-test_generator = test_datagen.flow_from_directory(
-    test_data_dir,
-    target_size = (img_width, img_height),
-    batch_size = 1,
-    shuffle = False)
-# TODO: Get number of elements dynamically
-test_elements = 10773
-probabilities = model.predict_generator(test_generator, test_elements)
-y_pred = np.argmax(probabilities, axis = 1)
-y_true = np.array([], dtype=int)
-for class_index in range(0, classes):
-    for index in range(0, 399):
-        y_true = np.append(y_true, class_index)
-mat = np.matrix(confusion_matrix(y_true, y_pred))
-with open('confusion1.txt','wb') as f:
-    for line in mat:
-        np.savetxt(f, line, fmt='%d')
-
-# at this point, the top layers are well trained and we can start fine-tuning
-# convolutional layers from inception V3. We will freeze the bottom N layers
-# and train the remaining top layers.
-
-# let's visualize layer names and layer indices to see how many layers
-# we should freeze:
-# for i, layer in enumerate(base_model.layers):
-#     print(i, layer.name)
-
-# we chose to train the top 2 inception blocks, i.e. we will freeze
-# the first 249 layers and unfreeze the rest:
+# Freeze only subset of base model's layers
 if FLAGS.model in 'inceptionv3':
     layers_not_trainable = 249
 elif FLAGS.model in 'resnet50':
@@ -159,36 +128,42 @@ for layer in model.layers[:layers_not_trainable]:
 for layer in model.layers[layers_not_trainable:]:
     layer.trainable = True
 
-# we need to recompile the model for these modifications to take effect
-# we use SGD with a low learning rate
+# Recompile model using SGD with a low learning rate
 model.compile(optimizer = SGD(lr = 0.0001, momentum = 0.9), loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
 # Define callbacks
 checkpoint = ModelCheckpoint('model-' + prefix + '-{epoch:03d}.h5', verbose = 1, monitor = 'val_loss', save_best_only = True, mode = 'auto')
 es = EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 3, verbose = 0, mode = 'auto')
 
-# we train our model again (this time fine-tuning the top 2 inception blocks
-# alongside the top Dense layers
+# Train model
 model.fit_generator(
     train_generator,
     epochs = FLAGS.second_training_epochs,
     validation_data = validation_generator,
     callbacks = [tensorboard, checkpoint, es])
 
-# TODO: Fix/update Create confusion matrix
+# Generate confusion matrix
+print ('Generating confusion matrix..')
+test_datagen = ImageDataGenerator(rescale = 1./255)
+test_generator = test_datagen.flow_from_directory(
+    test_data_dir,
+    target_size = (FLAGS.img_width, FLAGS.img_height),
+    batch_size = 1,
+    shuffle = False)
+test_elements = test_generator.__len__()
 probabilities = model.predict_generator(test_generator, test_elements)
 y_pred = np.argmax(probabilities, axis = 1)
-y_true = np.array([], dtype=int)
+y_true = np.array([], dtype = int)
 for class_index in range(0, classes):
-    for index in range(0, 399):
+    for index in range(0, int(test_elements/classes)):
         y_true = np.append(y_true, class_index)
 mat = np.matrix(confusion_matrix(y_true, y_pred))
-with open('confusion2.txt','wb') as f:
+with open('confusion.txt','wb') as f:
     for line in mat:
         np.savetxt(f, line, fmt='%d')
+print ('Wrote confusion matrix to: confusion.txt')
 
-# TODO: Is this needed anymore? (considering Early Stop)
-# Save model/weights
+# Save model weights
 model_json = model.to_json()
 model.save_weights(weights_filename)
 with open(model_filename, "w") as json_file:
