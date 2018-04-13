@@ -1,2 +1,1 @@
 # Licenta
-Licenta
