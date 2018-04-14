@@ -166,7 +166,7 @@ print ('Wrote confusion matrix to: confusion.txt')
 # Save model weights
 model_json = model.to_json()
 model.save_weights(weights_filename)
+model_filename = prefix + '-model'
 with open(model_filename, "w") as json_file:
     json_file.write(model_json)
-model.save_weights(weights_filename)
-print ("Saved model/weight to disk")
+print ("Saved model to disk")
