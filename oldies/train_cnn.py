@@ -14,7 +14,7 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.applications.resnet50 import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.layers import Dense, GlobalAveragePooling2D, Flatten
 from keras.models import Model, model_from_json
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
@@ -41,6 +41,7 @@ flags.DEFINE_integer('img_height', 224, 'Image height')
 train_data_dir = FLAGS.data_directory + '\\train'
 validation_data_dir = FLAGS.data_directory + '\\test'
 test_data_dir = FLAGS.data_directory + '\\test'
+print (train_data_dir)
 
 if K.image_data_format() == 'channels_first':
     input_shape = (3, FLAGS.img_width, FLAGS.img_height)
@@ -78,7 +79,7 @@ elif FLAGS.model in 'resnet50':
     prefix = 'resnet50'
     print ('Base model: ResNet50')
 elif FLAGS.model in 'densenet121':
-    base_model = DenseNet121(include_top = False, weights = 'imagenet', input_tensor = None, input_shape = input_shape)
+    base_model = DenseNet121(weights = 'imagenet', include_top = False, input_shape = input_shape, input_tensor = None)
     prefix = 'densenet121'
     print ('Base model: DenseNet121')
 else:
@@ -87,9 +88,12 @@ else:
 
 # Add a global spatial average pooling layer
 x = base_model.output
-x = GlobalAveragePooling2D()(x)
-# Let's add a fully-connected layer
-x = Dense(1024, activation = 'relu')(x)
+if FLAGS.model in 'resnet50':
+    x = Flatten(name="flatten")(x)
+else:
+    x = GlobalAveragePooling2D()(x)
+    # Let's add a fully-connected layer
+    x = Dense(1024, activation = 'relu')(x)
 # And a logistic layer
 predictions = Dense(classes, activation = 'softmax')(x)
 
@@ -165,7 +169,6 @@ print ('Wrote confusion matrix to: confusion.txt')
 
 # Save model weights
 model_json = model.to_json()
-model.save_weights(weights_filename)
 model_filename = prefix + '-model'
 with open(model_filename, "w") as json_file:
     json_file.write(model_json)
