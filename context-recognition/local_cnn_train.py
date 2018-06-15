@@ -118,7 +118,7 @@ def train_model(data_directory, cnn_model, batch_size, img_size, first_training_
 
     # Define callbacks
     tensorboard = TensorBoard(log_dir='logs/' + prefix + "-{}".format(time()))
-    es = EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 3, verbose = 0, mode = 'auto')
+    es = EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 8, verbose = 0, mode = 'auto')
 
     # Train the model on the new data for a few epochs
     model.fit_generator(

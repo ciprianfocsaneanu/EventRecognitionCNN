@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="header">
+    {{title}}
+  </div>
+  <div class="contentBody">
+    <div class="row">
+      <div class="tile col-md-6 col-sm-12 col-12">
+          <input type="file" class="form-control mb-4 mt-4" (change)="onFileChanged($event)" #fileInput>
+          <button (click)="onUpload()" class="btn btn-info">Upload</button>
+      </div>
+      <div class="tile col-md-6 col-sm-12 col-12 mb-4 mt-4" style="text-align: center">
+          Results
+      </div>
+    </div>
+  </div>
+</div>

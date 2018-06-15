@@ -15,3 +15,7 @@ context-recognition/logs/*
 object-context-recognition/logs/*
 
 object-context-recognition/export/*
+
+event-recognition-web-app/node_modules/*
+
+event-recognition-web-app/dist/*
