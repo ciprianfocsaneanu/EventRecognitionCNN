@@ -19,3 +19,5 @@ object-context-recognition/export/*
 event-recognition-web-app/node_modules/*
 
 event-recognition-web-app/dist/*
+
+event-recognition-web-app/package-lock.json
