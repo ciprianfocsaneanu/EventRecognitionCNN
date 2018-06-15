@@ -5,12 +5,12 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import sys
 
-with open('confusions/confusion-inceptionv3-19042018.txt','rb') as f:
+with open('../confusions/confusion-densenet121-19042018.txt','rb') as f:
     m = np.loadtxt(f)
 
 # Constants used
 img_width, img_height = 224, 224
-test_data_dir = 'places205-subset27\\test'
+test_data_dir = '../places205-subset27\\test'
 
 validation_datagen = ImageDataGenerator(rescale = 1./255)
 validation_generator = validation_datagen.flow_from_directory(

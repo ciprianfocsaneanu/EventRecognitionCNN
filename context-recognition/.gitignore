@@ -1,0 +1,9 @@
+subset/*
+
+*.jpg
+
+*.h5
+
+old-logs/*
+
+*.pyc

@@ -7,3 +7,11 @@ subset/*
 old-logs/*
 
 *.pyc
+
+Event-datasets/*
+
+context-recognition/logs/*
+
+object-context-recognition/logs/*
+
+object-context-recognition/export/*

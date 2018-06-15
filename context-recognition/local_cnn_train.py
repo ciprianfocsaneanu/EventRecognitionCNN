@@ -96,18 +96,18 @@ def train_model(data_directory, cnn_model, batch_size, img_size, first_training_
     model = Model(inputs = base_model.input, outputs = predictions)
 
     # Add hacky 1 epoch training for ResNet
-    if cnn_model in 'resnet50':
-        # Compile the model (should be done *after* setting layers to non-trainable)
-        model.compile(optimizer = 'rmsprop', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+    # if cnn_model in 'resnet50':
+    #     # Compile the model (should be done *after* setting layers to non-trainable)
+    #     model.compile(optimizer = 'rmsprop', loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
-        # Train the model on the new data for a few epochs
-        model.fit_generator(
-            train_generator,
-            epochs = 1,
-            validation_data = validation_generator,
-            callbacks = [])
+    #     # Train the model on the new data for a few epochs
+    #     model.fit_generator(
+    #         train_generator,
+    #         epochs = 1,
+    #         validation_data = validation_generator,
+    #         callbacks = [])
 
-        print ('Finished 1 epoch hacky training')
+    #     print ('Finished 1 epoch hacky training')
 
     # First: train only the extra top layers (which were randomly initialized)
     for layer in base_model.layers:
@@ -179,13 +179,8 @@ def train_model(data_directory, cnn_model, batch_size, img_size, first_training_
     print ('Wrote confusion matrix to ' + confusion_file)
 
     # Save model weights
-    model_json = model.to_json()
-    model_filename = prefix + '-model'
-    with open(model_filename, "w") as json_file:
-        json_file.write(model_json)
-    print ('Saved model to ' + model_filename)
-
-
+    model.save(prefix + '-model.h5')
+    print ('Saved model to: ' + prefix + '-model.h5')
 
 if __name__ == '__main__':
 

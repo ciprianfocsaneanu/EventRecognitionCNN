@@ -12,10 +12,12 @@ https://arxiv.org/abs/1608.06993
 
 `python local_cnn_train.py --cnn_model=densenet --data_directory=places205-subset27 --batch_size=16 --img_size=224 --first_training_epochs=10 --second_training_epochs=20`
 
-<del>
-### Train ResNet50 model
 
-https://arxiv.org/abs/1512.03385
+## Google Cloud Training
 
-`python local_cnn_train.py --cnn_model=resnet --data_directory=places205-subset27 --batch_size=16 --img_size=224 --first_training_epochs=5 --second_training_epochs=20`
-</del>
+`gcloud ml-engine jobs submit training $JOB_ID --job-dir gs://licenta-storage/jobs/$JOB_ID --module-name cloud-trainer.train --package-path ./cloud-trainer --region us-east1 --config=trainer/cloudml_gpu.yaml -- --data_bucket gs://licenta-storage/ --data_file places-dataset.h5`
+
+
+## Local event-recognition model serving
+
+`python run_keras_server.py --pretrained_model=../local-activity-recognition-model.h5`
