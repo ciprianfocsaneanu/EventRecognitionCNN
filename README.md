@@ -28,3 +28,7 @@ https://arxiv.org/abs/1608.06993
 ## Local event-recognition model serving
 
 `python run_keras_server.py --pretrained_model=../local-activity-recognition-model.h5`
+
+Setup:
+$ pip install -U flask-cors
+

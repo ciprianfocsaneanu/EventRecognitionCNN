@@ -5,7 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import sys
 
-with open('./confusion-oc-cnn-1527974970.0606675.txt','rb') as f:
+with open('./confusion-oc-cnn-1528961158.067217.txt','rb') as f:
     m = np.loadtxt(f)
 
 # Constants used
@@ -49,7 +49,7 @@ for x in range(0, classes):
 
 m = m.astype(int)
 df_cm = pd.DataFrame(m, categories, categories)
-sn.set(font_scale=0.9)#for label size
-sn.heatmap(df_cm, cmap="BuPu", annot=True, annot_kws={"size": 14})# font size
+sn.set(font_scale=1.3) # for label size
+sn.heatmap(df_cm, cmap="BuPu", annot=True, annot_kws={"size": 14}) # font size
 
 plt.show()

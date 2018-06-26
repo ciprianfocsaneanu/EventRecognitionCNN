@@ -7,11 +7,14 @@ import keras.backend as K
 from PIL import Image
 import numpy as np
 import flask
+from flask_cors import CORS, cross_origin
 import io
 import argparse
 
 # Initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 model = None
 
 # Hardcode WIDER 19 classes
@@ -41,6 +44,7 @@ def prepare_image(image, target):
 
 # Implement POST method
 @app.route("/predict", methods=["POST"])
+@cross_origin()
 def predict():
 	# Initialize the data dictionary that will be returned from the
 	data = {"success": False}
