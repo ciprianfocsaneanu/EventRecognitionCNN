@@ -1,10 +1,12 @@
-<div class="pageContainer">
-  <div class="header">
+<div class="navbar">
+  <div class="title">
     {{title}}
   </div>
+</div>
+<div class="pageContainer">
   <div class="contentBody">
     <div class="row">
-      <div class="tile col-md-6 col-sm-12 col-12">
+      <div class="tile col-md-5 col-sm-10 col-10">
           <input type="file" class="form-control mb-4 mt-4" (change)="onFileChanged($event)" #fileInput>
           <button (click)="onUpload()" class="btn btn-info">Upload</button>
           <div *ngIf="resultsLoading" class="sk-circle">
@@ -28,9 +30,15 @@
             <div style="width: 100%">
               <img class="mx-auto" style="display: -webkit-box;" [src]="imageSrc"/>
             </div>
+            <div *ngIf="!!predictedClass" class="prediction">
+              Predicted class: {{predictedClass}}
+            </div>
+            <div *ngIf="!!predictedClass" style="text-align: center;">
+              Prediction request time: {{elapsedTime}} milliseconds
+            </div>
           </div>
       </div>
-      <div class="tile col-md-6 col-sm-12 col-12 mb-4 mt-4" style="text-align: center">
+      <div class="tile col-md-7 col-sm-14 col-14 mb-4 mt-4" style="text-align: center">
           <div class="subtitle">
             Results
           </div>

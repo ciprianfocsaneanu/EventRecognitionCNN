@@ -3,6 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import * as Chart from 'chart.js';
 import { DomSanitizer } from '@angular/platform-browser';
 
+/*
+  TODO:
+  - add time elapsed for request
+  - show top prediction ('Prediction: ')
+  - style title
+*/
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -12,7 +18,7 @@ export class AppComponent implements AfterViewInit {
   // *********************
   // ** Public Members ***
   // *********************
-  public title = 'Event Recognition Web App';
+  public title = 'Event Recognition using CNNs - Demo';
 
   // *********************
   // ** Private Members **
@@ -20,6 +26,8 @@ export class AppComponent implements AfterViewInit {
   private m_selectedFile: File;
   private m_resultsLoading = false;
   private m_chart: Chart;
+  private m_predictedClass: string = null;
+  private m_predictionElapsedTime: number = null;
   private m_config = {
     type: 'horizontalBar',
     data: {
@@ -77,25 +85,43 @@ export class AppComponent implements AfterViewInit {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
   }
+  public get predictedClass(): string {
+    return this.m_predictedClass;
+  }
+  public get elapsedTime(): number {
+    return this.m_predictionElapsedTime;
+  }
 
   // *********************
   // ** Private Methods **
   // *********************
   onFileChanged(event) {
     this.m_selectedFile = event.target.files[0];
+    this.resetState();
+  }
+  resetState() {
+    this.m_config.data.labels = [];
+    this.m_config.data.datasets[0].data = [];
+    this.m_chart.update();
+    this.m_predictedClass = null;
+    this.m_predictionElapsedTime = null;
   }
   onUpload() {
     this.m_resultsLoading = true;
     const reader = new FileReader();
     const formData = new FormData();
     formData.append('image', this.m_selectedFile);
+    const start = performance.now();
     this.m_http.post('http://localhost:5000/predict', formData).subscribe(
       (res: any) => {
+        const end = performance.now();
+        this.m_predictionElapsedTime = Math.floor(end - start);
         if (res.predictions && res.predictions.length === 5) {
           const labels = [];
           for (let i = 0; i < 5; i++) {
             labels.push(res.predictions[i].label);
           }
+          this.m_predictedClass = labels[0];
           this.m_config.data.labels = labels;
           const probabilities = [];
           for (let i = 0; i < 5; i++) {
